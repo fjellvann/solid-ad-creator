@@ -1,55 +1,55 @@
 # PRD: Meta Creatives Pipeline
 
-## Oversikt
+## Overview
 
-Et CLI-basert system for å generere store mengder statiske Meta-annonser (creatives) fra HTML/CSS-templates og strukturert data. Systemet skal brukes internt av Solid Media først, men designes for å enkelt onboarde nye kunder/brands.
+A CLI-based system for generating large volumes of static Meta ad creatives from HTML/CSS templates and structured data. The system will be used internally by Solid Media first, but is designed to easily onboard new clients/brands.
 
-**Primært mål:** Gå fra kampanjebriefing til 30-50+ ferdige creatives på minutter, ikke timer.
+**Primary goal:** Go from campaign briefing to 30-50+ finished creatives in minutes, not hours.
 
-## Arkitektur
+## Architecture
 
 ```
 meta-creatives/
-├── templates/              # HTML/CSS ad-templates
-│   ├── awareness/          # Gruppert etter kampanjetype
+├── templates/              # HTML/CSS ad templates
+│   ├── awareness/          # Grouped by campaign type
 │   │   ├── bold-statement.html
 │   │   ├── social-proof.html
 │   │   └── problem-agitate.html
 │   ├── conversion/
 │   │   ├── offer-cta.html
 │   │   └── comparison.html
-│   └── _partials/          # Gjenbrukbare HTML-fragmenter (logo, CTA-knapp, badge)
+│   └── _partials/          # Reusable HTML fragments (logo, CTA button, badge)
 │       ├── cta-button.html
 │       └── logo-block.html
-├── brands/                 # Merkevare-konfigurasjon
+├── brands/                 # Brand configuration
 │   ├── solid-media.json
 │   └── _example.json
-├── campaigns/              # Kampanjedata
+├── campaigns/              # Campaign data
 │   ├── solid-media-q2-awareness.json
 │   └── _example.json
-├── output/                 # Genererte creatives (gitignored)
+├── output/                 # Generated creatives (gitignored)
 ├── src/
 │   ├── cli.ts              # CLI entry point
 │   ├── renderer.ts         # Puppeteer rendering engine
-│   ├── template-engine.ts  # Template injection og variasjonsgenerering
-│   ├── matrix.ts           # Kombinatorisk variant-matrise
-│   └── naming.ts           # Filnavnkonvensjon
+│   ├── template-engine.ts  # Template injection and variation generation
+│   ├── matrix.ts           # Combinatorial variant matrix
+│   └── naming.ts           # File naming convention
 ├── package.json
 ├── tsconfig.json
 └── README.md
 ```
 
-## Tech stack
+## Tech Stack
 
-- **Runtime:** Node.js med TypeScript
+- **Runtime:** Node.js with TypeScript
 - **Rendering:** Puppeteer (headless Chrome → screenshot)
-- **Template:** Ren HTML/CSS med Handlebars for variabelinjeksjon
+- **Templating:** Plain HTML/CSS with Handlebars for variable injection
 - **CLI:** Commander.js
-- **Bildeprosessering:** Sharp (for eventuell optimalisering/resizing)
+- **Image processing:** Sharp (for optional optimization/resizing)
 
-## Datamodell
+## Data Model
 
-### Brand-konfigurasjon (`brands/solid-media.json`)
+### Brand Configuration (`brands/solid-media.json`)
 
 ```json
 {
@@ -79,12 +79,12 @@ meta-creatives/
   },
   "cta": {
     "style": "rounded",
-    "defaultText": "Les mer"
+    "defaultText": "Learn more"
   }
 }
 ```
 
-### Kampanjedata (`campaigns/solid-media-q2-awareness.json`)
+### Campaign Data (`campaigns/solid-media-q2-awareness.json`)
 
 ```json
 {
@@ -94,12 +94,12 @@ meta-creatives/
   "formats": ["1080x1080", "1080x1920", "1200x628"],
   "variants": {
     "hooks": [
-      { "id": "hook-a", "headline": "Din nettside er ikke bygget for AI-søk", "subline": "Er du synlig der kundene faktisk leter?" },
-      { "id": "hook-b", "headline": "Google forandret alt. Igjen.", "subline": "Slik tilpasser du deg AI Overviews" },
-      { "id": "hook-c", "headline": "8% av klikkene forsvant", "subline": "Vi hjelper deg å få dem tilbake" }
+      { "id": "hook-a", "headline": "Your website isn't built for AI search", "subline": "Are you visible where customers actually look?" },
+      { "id": "hook-b", "headline": "Google changed everything. Again.", "subline": "How to adapt to AI Overviews" },
+      { "id": "hook-c", "headline": "8% of clicks disappeared", "subline": "We help you get them back" }
     ],
     "images": [
-      { "id": "img-serp", "src": "assets/images/serp-screenshot.png", "alt": "AI Overview eksempel" },
+      { "id": "img-serp", "src": "assets/images/serp-screenshot.png", "alt": "AI Overview example" },
       { "id": "img-dashboard", "src": "assets/images/dashboard.png", "alt": "Rank tracker dashboard" }
     ],
     "colorThemes": [
@@ -110,21 +110,21 @@ meta-creatives/
 }
 ```
 
-### Variant-matrise
+### Variant Matrix
 
-Systemet genererer det kartesiske produktet av alle variant-dimensjoner:
+The system generates the Cartesian product of all variant dimensions:
 
 ```
 hooks (3) × images (2) × colorThemes (2) × formats (3) = 36 creatives
 ```
 
-Brukeren kan også spesifisere eksplisitte kombinasjoner for å begrense output med en valgfri `"include"` eller `"exclude"` array i kampanjefilen.
+Users can also specify explicit combinations to limit output with an optional `"include"` or `"exclude"` array in the campaign file.
 
 ## Templates
 
-### Template-format
+### Template Format
 
-Templates er standard HTML/CSS-filer med Handlebars-variabler. Hver template er self-contained med inline CSS.
+Templates are standard HTML/CSS files with Handlebars variables. Each template is self-contained with inline CSS.
 
 ```html
 <!DOCTYPE html>
@@ -206,9 +206,9 @@ Templates er standard HTML/CSS-filer med Handlebars-variabler. Hver template er 
 </html>
 ```
 
-### Format-responsive verdier
+### Format-Responsive Values
 
-Hvert format har forhåndsdefinerte responsive verdier slik at typografi og spacing skalerer riktig:
+Each format has predefined responsive values so that typography and spacing scale correctly:
 
 ```json
 {
@@ -218,31 +218,31 @@ Hvert format har forhåndsdefinerte responsive verdier slik at typografi og spac
 }
 ```
 
-## CLI-grensesnitt
+## CLI Interface
 
-### Kommandoer
+### Commands
 
 ```bash
-# Generer alle varianter for en kampanje
+# Generate all variants for a campaign
 npx meta-creatives generate campaigns/solid-media-q2-awareness.json
 
-# Generer kun ett format
+# Generate only one format
 npx meta-creatives generate campaigns/solid-media-q2-awareness.json --format 1080x1080
 
-# Generer med spesifikke varianter
+# Generate with specific variants
 npx meta-creatives generate campaigns/solid-media-q2-awareness.json --hook hook-a --theme dark
 
-# Preview én spesifikk kombinasjon i nettleseren (åpner HTML)
+# Preview a specific combination in the browser (opens HTML)
 npx meta-creatives preview campaigns/solid-media-q2-awareness.json --hook hook-a --image img-serp --theme dark --format 1080x1080
 
-# Liste ut variant-matrisen uten å rendre
+# List the variant matrix without rendering
 npx meta-creatives matrix campaigns/solid-media-q2-awareness.json
 
-# Scaffold nytt brand
-npx meta-creatives init-brand "Kundenavn"
+# Scaffold a new brand
+npx meta-creatives init-brand "Client Name"
 
-# Scaffold ny kampanje
-npx meta-creatives init-campaign solid-media "kampanjenavn"
+# Scaffold a new campaign
+npx meta-creatives init-campaign solid-media "campaign-name"
 ```
 
 ### Output
@@ -255,16 +255,16 @@ output/
         ├── solid-media_q2-awareness_bold-statement_1080x1080_hook-a_img-serp_light.png
         ├── solid-media_q2-awareness_bold-statement_1080x1080_hook-a_img-dashboard_dark.png
         ├── ...
-        └── manifest.json   # Metadata om alle genererte filer
+        └── manifest.json   # Metadata for all generated files
 ```
 
-### Filnavnkonvensjon
+### File Naming Convention
 
 ```
 {brand}_{campaign}_{template}_{format}_{hook}_{image}_{theme}.png
 ```
 
-Alt lowercase, bindestreker innenfor segmenter, understreker mellom segmenter. Gjør det trivielt å filtrere og sortere i Meta Ads Manager.
+All lowercase, hyphens within segments, underscores between segments. Makes it trivial to filter and sort in Meta Ads Manager.
 
 ### manifest.json
 
@@ -281,7 +281,7 @@ Alt lowercase, bindestreker innenfor segmenter, understreker mellom segmenter. G
       "hook": "hook-a",
       "image": "img-serp",
       "theme": "dark",
-      "headline": "Din nettside er ikke bygget for AI-søk",
+      "headline": "Your website isn't built for AI search",
       "dimensions": { "width": 1080, "height": 1080 },
       "sizeKb": 245
     }
@@ -289,73 +289,73 @@ Alt lowercase, bindestreker innenfor segmenter, understreker mellom segmenter. G
 }
 ```
 
-## Renderingsmotor
+## Rendering Engine
 
-### Flyt
+### Flow
 
 ```
-1. Les kampanje-JSON
-2. Les brand-JSON (basert på kampanjens `brand`-felt)
-3. Merge brand-farger med eventuelle colorTheme-overrides
-4. Bygg variant-matrise (kartesisk produkt)
-5. For hver variant:
-   a. Les template HTML
-   b. Kompiler Handlebars-template med merged data (brand + variant + format)
-   c. Start Puppeteer-side med riktig viewport (format-dimensjoner)
-   d. Sett HTML-innhold
-   e. Vent på fonter og bilder (networkidle0)
-   f. Ta screenshot som PNG
-   g. Optimaliser med Sharp (komprimering uten kvalitetstap)
-   h. Lagre til output-mappe
-6. Generer manifest.json
-7. Skriv oppsummering til terminal
+1. Read campaign JSON
+2. Read brand JSON (based on the campaign's `brand` field)
+3. Merge brand colors with any colorTheme overrides
+4. Build variant matrix (Cartesian product)
+5. For each variant:
+   a. Read template HTML
+   b. Compile Handlebars template with merged data (brand + variant + format)
+   c. Launch Puppeteer page with correct viewport (format dimensions)
+   d. Set HTML content
+   e. Wait for fonts and images (networkidle0)
+   f. Take screenshot as PNG
+   g. Optimize with Sharp (lossless compression)
+   h. Save to output directory
+6. Generate manifest.json
+7. Write summary to terminal
 ```
 
-### Ytelse
+### Performance
 
-- Gjenbruk én Puppeteer browser-instans på tvers av alle varianter
-- Bruk `page.setContent()` og viewport-resize fremfor ny side per variant
-- Parallelliser med et konfigurerbart antall concurrent sider (default: 4)
-- Mål og rapporter total render-tid og gjennomsnitt per creative
+- Reuse a single Puppeteer browser instance across all variants
+- Use `page.setContent()` and viewport resize instead of a new page per variant
+- Parallelize with a configurable number of concurrent pages (default: 4)
+- Measure and report total render time and average per creative
 
-## Håndtering av assets
+## Asset Handling
 
-- Bilder referert i kampanje-JSON bruker relative paths fra prosjektrot
-- Logo-paths i brand-JSON er også relative fra prosjektrot
-- Alle asset-paths konverteres til `file://`-absolutte paths ved rendering
-- Google Fonts lastes via `@import` i template CSS
+- Images referenced in campaign JSON use relative paths from project root
+- Logo paths in brand JSON are also relative from project root
+- All asset paths are converted to `file://` absolute paths at render time
+- Google Fonts are loaded via `@import` in template CSS
 
-## Validering
+## Validation
 
-Før rendering, valider:
+Before rendering, validate:
 
-- At brand-JSON eksisterer og har alle required fields
-- At kampanje-JSON er gyldig og refererer til eksisterende brand
-- At alle refererte template-filer eksisterer
-- At alle refererte asset-filer (bilder, logoer) eksisterer
-- At format-dimensjoner er gyldige positive heltall
-- Gi klare feilmeldinger med filsti og felt som mangler
+- That the brand JSON exists and has all required fields
+- That the campaign JSON is valid and references an existing brand
+- That all referenced template files exist
+- That all referenced asset files (images, logos) exist
+- That format dimensions are valid positive integers
+- Provide clear error messages with file path and missing field
 
-## Fremtidige utvidelser (ikke i scope for v1, men design for det)
+## Future Extensions (not in scope for v1, but design for it)
 
-- **Claude API-integrasjon for copy-generering:** Legg til en `generate-copy` kommando som tar et kampanjebrief og genererer hook-varianter via Claude API, lagrer direkte som kampanje-JSON.
-- **Figma-import:** Les farger og fonter fra en Figma-fil via API for å auto-generere brand-JSON.
-- **Video/motion:** Utvide til å generere korte animerte varianter med Remotion eller liknende.
-- **A/B-test tracking:** Koble manifest.json med Meta API for å automatisk opprette ad sets med riktig navngivning.
-- **Web UI:** Et enkelt dashboard for å browse og godkjenne genererte creatives før de pushes til Meta.
+- **Claude API integration for copy generation:** Add a `generate-copy` command that takes a campaign brief and generates hook variants via Claude API, saving directly as campaign JSON.
+- **Figma import:** Read colors and fonts from a Figma file via API to auto-generate brand JSON.
+- **Video/motion:** Extend to generate short animated variants with Remotion or similar.
+- **A/B test tracking:** Connect manifest.json with Meta API to automatically create ad sets with correct naming.
+- **Web UI:** A simple dashboard to browse and approve generated creatives before pushing to Meta.
 
-## Akseptansekriterier for v1
+## Acceptance Criteria for v1
 
-1. `generate`-kommandoen produserer PNG-filer i riktige dimensjoner for alle tre formater (1080x1080, 1080x1920, 1200x628)
-2. Fonter fra Google Fonts rendres korrekt i output
-3. Bilder (PNG/JPG/SVG) vises korrekt i templates
-4. Variant-matrisen genererer korrekt antall kombinasjoner
-5. Filnavn følger konvensjonen konsekvent
-6. manifest.json inneholder korrekt metadata for alle genererte filer
-7. `preview`-kommandoen åpner en spesifikk variant i nettleseren
-8. `matrix`-kommandoen viser alle planlagte varianter i terminalen
-9. `init-brand` og `init-campaign` scaffolder gyldige JSON-filer
-10. Rendering av 36 varianter tar under 60 sekunder
-11. Klare feilmeldinger ved ugyldig input (manglende filer, feil JSON-format)
-12. README med installasjon, brukseksempler, og forklaring av datamodellen
-13. Minst to ferdige templates medfølger: `awareness/bold-statement` og `conversion/offer-cta`
+1. The `generate` command produces PNG files in correct dimensions for all three formats (1080x1080, 1080x1920, 1200x628)
+2. Fonts from Google Fonts render correctly in output
+3. Images (PNG/JPG/SVG) display correctly in templates
+4. The variant matrix generates the correct number of combinations
+5. File names follow the convention consistently
+6. manifest.json contains correct metadata for all generated files
+7. The `preview` command opens a specific variant in the browser
+8. The `matrix` command displays all planned variants in the terminal
+9. `init-brand` and `init-campaign` scaffold valid JSON files
+10. Rendering 36 variants takes under 60 seconds
+11. Clear error messages for invalid input (missing files, bad JSON format)
+12. README with installation, usage examples, and data model explanation
+13. At least two ready-made templates included: `awareness/bold-statement` and `conversion/offer-cta`
